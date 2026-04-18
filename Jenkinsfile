@@ -3,16 +3,10 @@ pipeline {
 
     environment {
         IMAGE_NAME = "mumma-ai"
-        IMAGE_TAG = "v1"
+        IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
     stages {
-
-        stage('Checkout SCM') {
-          steps {
-            git branch: 'main', url: 'https://github.com/Gauravi004/mumma-ai.git'
-         }
-       }
 
         stage('Build') {
             steps {
@@ -23,9 +17,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                python3 -m venv venv
-                . venv/bin/activate
-                pip install pytest || true
+                pip3 install pytest || true
                 pytest || true
                 '''
             }
@@ -34,8 +26,7 @@ pipeline {
         stage('Code Quality') {
             steps {
                 sh '''
-                . venv/bin/activate || true
-                pip install flake8 || true
+                pip3 install flake8 || true
                 flake8 . || true
                 '''
             }
@@ -58,13 +49,20 @@ pipeline {
 
         stage('Release') {
             steps {
-                echo 'Releasing version v1 of Mumma AI'
+                echo "Releasing version ${IMAGE_TAG}"
+                sh 'echo $IMAGE_TAG > release.txt'
             }
         }
 
         stage('Monitoring') {
             steps {
-                sh 'docker ps'
+                sh '''
+                echo "Running Containers:"
+                docker ps
+
+                echo "Container Logs:"
+                docker logs mumma-container || true
+                '''
             }
         }
     }
