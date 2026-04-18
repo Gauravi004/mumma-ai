@@ -1,53 +1,23 @@
-import webbrowser
+from flask import Flask, request
 import requests
 import google.generativeai as genai
 
-# Simple speak function (CI-friendly)
-def speak(text):
-    print("AI says:", text)
+app = Flask(__name__)
 
+def speak(text):
+    return f"AI says: {text}"
 
 def processText(text):
     text = text.lower()
 
     if "youtube" in text:
-        speak("Opening YouTube")
-        print("URL: https://www.youtube.com")
+        return "https://www.youtube.com"
 
     elif "github" in text:
-        speak("Opening GitHub")
-        print("URL: https://github.com")
-
-    elif "facebook" in text:
-        speak("Opening Facebook")
-        print("URL: https://www.facebook.com")
-
-    elif "twitter" in text:
-        speak("Opening Twitter")
-        print("URL: https://twitter.com")
-
-    elif "instagram" in text:
-        speak("Opening Instagram")
-        print("URL: https://www.instagram.com")
-
-    elif "linkedin" in text:
-        speak("Opening LinkedIn")
-        print("URL: https://www.linkedin.com")
-
-    elif "whatsapp" in text:
-        speak("Opening WhatsApp")
-        print("URL: https://web.whatsapp.com")
-
-    elif "gmail" in text:
-        speak("Opening Gmail")
-        print("URL: https://mail.google.com")
+        return "https://github.com"
 
     elif "google" in text:
-        speak("Opening Google")
-        print("URL: https://www.google.com")
-
-    elif text.startswith("play"):
-        speak("Playing song (demo mode)")
+        return "https://www.google.com"
 
     elif "news" in text:
         try:
@@ -59,43 +29,28 @@ def processText(text):
 
             if articles:
                 article = articles[0]
-                speak("Title: " + article.get('title', 'No title'))
-                speak("Description: " + article.get('description', 'No description'))
+                return article.get('title', 'No news available')
             else:
-                speak("No news available")
+                return "No news available"
 
-        except Exception as e:
-            speak("Error fetching news")
-            print("Error:", e)
-
-    elif "bye" in text or "exit" in text or "stop" in text:
-        speak("Bye bye! Take care!")
+        except Exception:
+            return "Error fetching news"
 
     else:
-        try:
-            genai.configure(api_key="YOUR_API_KEY_HERE")  # optional
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(text)
-            speak(response.text.strip())
-        except Exception:
-            speak("AI response not available in demo mode")
+        return "Mumma AI is running 🚀"
 
 
-# Test mode (for Jenkins & Docker)
+# 🔹 Web route
+@app.route("/")
+def home():
+    return "Mumma AI is running successfully 🚀"
+
+@app.route("/ask")
+def ask():
+    query = request.args.get("q", "")
+    return processText(query)
+
+
+# 🔹 Main
 if __name__ == "__main__":
-    print("Running in CI test mode...")
-
-    test_commands = [
-        "youtube",
-        "github",
-        "news",
-        "google",
-        "play song",
-        "hello"
-    ]
-
-    for cmd in test_commands:
-        print(f"\nProcessing: {cmd}")
-        processText(cmd)
-
-    print("\nAll test commands executed successfully.")
+    app.run(host="0.0.0.0", port=5000)
