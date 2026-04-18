@@ -8,16 +8,16 @@ pipeline {
 
     stages {
 
-        stage('Setup') {
-            steps {
-                sh '''
-                echo "Installing dependencies..."
+     stage('Setup') {
+         steps {
+        sh '''
+        echo "Installing dependencies..."
 
-                pip3 install --upgrade pip
-                pip3 install pytest flake8 requests google-generativeai || true
-                '''
-            }
-        }
+        pip3 install --upgrade pip --break-system-packages || true
+        pip3 install pytest flake8 requests google-generativeai --break-system-packages || true
+        '''
+      }
+  }
 
         stage('Build') {
             steps {
