@@ -9,10 +9,10 @@ pipeline {
     stages {
 
         stage('Checkout SCM') {
-            steps {
-                git 'https://github.com/Gauravi004/mumma-ai.git'
-            }
-        }
+          steps {
+            git branch: 'main', url: 'https://github.com/Gauravi004/mumma-ai.git'
+         }
+       }
 
         stage('Build') {
             steps {
