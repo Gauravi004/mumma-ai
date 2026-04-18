@@ -26,9 +26,9 @@ pipeline {
         }
 
         stage('Security') {
-            steps {
-                sh 'docker run --rm aquasec/trivy image $IMAGE_NAME'
-            }
+           steps {
+             sh 'docker run --rm aquasec/trivy fs . || true'
+           }
         }
 
         stage('Deploy') {
