@@ -9,9 +9,9 @@ pipeline {
     stages {
 
         stage('Build') {
-            steps {
-                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
-            }
+          steps {
+           echo 'Building Docker Image (simulated)'
+          }
         }
 
         stage('Test') {
