@@ -8,16 +8,30 @@ pipeline {
 
     stages {
 
+        stage('Setup') {
+            steps {
+                sh '''
+                echo "Installing dependencies..."
+
+                pip3 install --upgrade pip
+                pip3 install pytest flake8 requests google-generativeai || true
+                '''
+            }
+        }
+
         stage('Build') {
-          steps {
-           echo 'Building Docker Image (simulated)'
-          }
+            steps {
+                sh '''
+                echo "Building Docker image..."
+                docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                '''
+            }
         }
 
         stage('Test') {
             steps {
                 sh '''
-                pip3 install pytest || true
+                echo "Running tests..."
                 pytest || true
                 '''
             }
@@ -26,7 +40,7 @@ pipeline {
         stage('Code Quality') {
             steps {
                 sh '''
-                pip3 install flake8 || true
+                echo "Checking code quality..."
                 flake8 . || true
                 '''
             }
@@ -34,13 +48,17 @@ pipeline {
 
         stage('Security') {
             steps {
-                sh 'docker run --rm aquasec/trivy fs . || true'
+                sh '''
+                echo "Running security scan..."
+                docker run --rm aquasec/trivy fs . || true
+                '''
             }
         }
 
         stage('Deploy') {
             steps {
                 sh '''
+                echo "Deploying container..."
                 docker rm -f mumma-container || true
                 docker run -d --name mumma-container -p 5001:5000 $IMAGE_NAME:$IMAGE_TAG
                 '''
@@ -49,8 +67,10 @@ pipeline {
 
         stage('Release') {
             steps {
-                echo "Releasing version ${IMAGE_TAG}"
-                sh 'echo $IMAGE_TAG > release.txt'
+                sh '''
+                echo "Releasing version $IMAGE_TAG"
+                echo $IMAGE_TAG > release.txt
+                '''
             }
         }
 
